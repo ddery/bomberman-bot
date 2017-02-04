@@ -2,12 +2,15 @@
 #define _H_ENTITY
 
 #include <bits/stdc++.h>
+#include "player.h"
+#include "bomb.h"
 
 using namespace std;
 
 typedef struct {
   int type;
-  unordered_map<string,char*> dict;
+  Player* player;
+  Bomb* bomb;
 } Entity;
 
 #endif
