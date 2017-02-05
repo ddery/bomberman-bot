@@ -5,12 +5,13 @@ class Player;
 
 #include <bits/stdc++.h>
 #include "bomb.h"
+#include "location.h"
 
 using namespace std;
 
 class Player {
   public:
-    Player(const char*, char, int, bool, int, int, pair<int,int>);
+    Player(const char*, char, int, bool, int, int, Location);
 
     string name;
     char key;
@@ -18,7 +19,7 @@ class Player {
     bool killed;
     int bomb_bag;
     int bomb_radius;
-    pair<int,int> location;
+    Location location;
     vector<Bomb*> bombs;
 };
 

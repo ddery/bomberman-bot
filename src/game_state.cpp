@@ -4,6 +4,25 @@
 
 using namespace std;
 
+const int GameState::FREE = 1;
+const int GameState::WALL = 2;
+const int GameState::BRICK = 4;
+const int GameState::BOMB = 8;
+const int GameState::PLAYER = 16;
+const int GameState::SUPER_POWER_UP = 32;
+const int GameState::RADIUS_POWER_UP = 64;
+const int GameState::BAG_POWER_UP = 128;
+
+const int GameState::DO_NOTHING = -1;
+const int GameState::GO_UP = 1;
+const int GameState::GO_LEFT = 2;
+const int GameState::GO_RIGHT = 3;
+const int GameState::GO_DOWN = 4;
+const int GameState::PUT_BOMB = 5;
+const int GameState::TRIGGER_BOMB = 6;
+
+const int GameState::OCCUPIEABLE = GameState::FREE | GameState::SUPER_POWER_UP | GameState::RADIUS_POWER_UP | GameState::BAG_POWER_UP;
+
 void GameState::load_game_state(const char* file) {
   ifstream in(file);
   if (in.is_open()) {
@@ -43,7 +62,7 @@ void GameState::load_game_player(Json::Object* state_json) {
         int location_x = ((Json::Number*) location_json->get("X"))->value();
         int location_y = ((Json::Number*) location_json->get("Y"))->value();
 
-        Player *player = new Player(name.c_str(), key, points, killed, bomb_bag, bomb_radius, make_pair(location_x,location_y));
+        Player *player = new Player(name.c_str(), key, points, killed, bomb_bag, bomb_radius, {location_x,location_y});
         this->players.push_back(*player);
     }
 }
@@ -85,13 +104,16 @@ void GameState::load_game_map(Json::Object* state_json) {
                 char owner_key = ((Json::String*) ((Json::Object*) bomb_json->get("Owner"))->get("Key"))->value()[0];
                 Player* owner = this->get_player_by_key(owner_key);
 
-                Bomb* bomb = new Bomb(owner, radius, time_left, explode, make_pair(location_x, location_y));
+                Bomb* bomb = new Bomb(owner, radius, time_left, explode, {location_x, location_y});
                 this->bombs.push_back(*bomb);
                 owner->bombs.push_back(bomb);
 
                 cur_block->type |= GameState::BOMB;
                 cur_block->bomb = bomb;
             }
+
+            if (cur_block->type == 0)
+                cur_block->type |= GameState::FREE;
         }
     }
 }
@@ -115,6 +137,10 @@ Player* GameState::get_player_by_key(char key) {
     return temp;
 }
 
+Player* GameState::get_me() {
+    return this->me;
+}
+
 int GameState::get_map_width() {
     return this->map_width;
 }
@@ -129,6 +155,10 @@ int GameState::get_round() {
 
 vector<Player> GameState::get_player_vector() {
     return this->players;
+}
+
+vector<Bomb> GameState::get_bomb_vector() {
+    return this->bombs;
 }
 
 Entity* GameState::operator[] (int index) {

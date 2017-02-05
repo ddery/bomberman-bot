@@ -4,7 +4,7 @@
 using namespace std;
 
 Player::Player(const char* name, char key='A', int points = 0, bool killed = false,
-  int bombag = 1, int bombradius = 1, pair<int,int> location = {1,1}) {
+  int bombag = 1, int bombradius = 1, Location location = {1,1}) {
     this->name = name;
     this->key = key;
     this->points = points;

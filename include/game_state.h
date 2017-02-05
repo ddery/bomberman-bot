@@ -15,29 +15,33 @@ class GameState {
     GameState(int argc, char** argv);
     ~GameState();
 
-    static const int FREE = 0;
-    static const int WALL = 1;
-    static const int BRICK = 2;
-    static const int BOMB = 4;
-    static const int PLAYER = 8;
-    static const int SUPER_POWER_UP = 16;
-    static const int RADIUS_POWER_UP = 32;
-    static const int BAG_POWER_UP = 64;
+    static const int FREE;
+    static const int WALL;
+    static const int BRICK;
+    static const int BOMB;
+    static const int PLAYER;
+    static const int SUPER_POWER_UP;
+    static const int RADIUS_POWER_UP;
+    static const int BAG_POWER_UP;
 
-    static const int DO_NOTHING = -1;
-    static const int GO_UP = 1;
-    static const int GO_LEFT = 2;
-    static const int GO_RIGHT = 3;
-    static const int GO_DOWN = 4;
-    static const int PUT_BOMB = 5;
-    static const int TRIGGER_BOMB = 6;
+    static const int DO_NOTHING;
+    static const int GO_UP;
+    static const int GO_LEFT;
+    static const int GO_RIGHT;
+    static const int GO_DOWN;
+    static const int PUT_BOMB;
+    static const int TRIGGER_BOMB;
+
+    static const int OCCUPIEABLE;
 
     Player* get_player_by_key(char key);
+    Player* get_me();
 
     int get_map_width();
     int get_map_height();
     int get_round();
     vector<Player> get_player_vector();
+    vector<Bomb> get_bomb_vector();
 
     Entity* operator[] (int);
 

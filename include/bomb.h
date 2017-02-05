@@ -5,17 +5,18 @@ class Bomb;
 
 #include <bits/stdc++.h>
 #include "player.h"
+#include "location.h"
 
 using namespace std;
 
 class Bomb {
     public:
-        Bomb(Player*, int, int, bool, pair<int,int>);
+        Bomb(Player*, int, int, bool, Location);
         int radius;
         int time_left;
         bool is_exploding;
         Player* owner;
-        pair<int,int> location;
+        Location location;
 };
 
 #endif
