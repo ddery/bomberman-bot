@@ -60,3 +60,73 @@ Baris keempat ngeset jarak lokasi saat.
 Baris sisanya tu masukin tetangga-tetangganya untuk diproses lebih lanjut.
 
 Intinya sih gitu.
+
+Contoh program jadinya gini
+
+    #include <bits/stdc++.h>
+
+    #define INF 2000000000
+
+    using namespace std;
+
+    typedef struct {
+        int x,y;
+    } location;
+    
+    string petak[21];
+    int N,M,jarak[21][21];
+    
+    int main() {
+    	N = 21;
+    	M = 21;
+    	petak[0] = "#####################";
+        petak[1] = "#           7   +++ #";
+        petak[2] = "# # # # # # #A# # # #";
+        petak[3] = "#          1        #";
+        petak[4] = "# # # # # # # # # # #";
+        petak[5] = "#   ++    +      ++ #";
+        petak[6] = "# # # #+# # # # # #+#";
+        petak[7] = "#+ +   + + +     + +#";
+        petak[8] = "#+# # # #+#+# # # #+#";
+        petak[9] = "#   +  +++ +++  +   #";
+        petak[10] = "#+# # #+#   #+# # #+#";
+        petak[11] = "#       +       +   #";
+        petak[12] = "#+# # # # # # # # #+#";
+        petak[13] = "#+               + +#";
+        petak[14] = "#+# # # # # # # # #+#";
+        petak[15] = "#         +         #";
+        petak[16] = "# # #+#+#+#+# # # #+#";
+        petak[17] = "#+b  + +++ +++      #";
+        petak[18] = "# # # #+# # #+# # # #";
+        petak[19] = "# +++  ++   ++      #";
+        petak[20] = "#####################";
+    	
+    	for (int i = 0; i < N; i++)
+            for (int j = 0; j < M; j++)
+                jarak[i][j] = INF;
+    
+        queue<pair<location,int> > Q;
+        Q.push({{13,2},0});
+        while (!Q.empty()) {
+            pair<location,int> current = Q.front(); Q.pop();
+            if (jarak[current.first.y][current.first.x] == INF) {
+                jarak[current.first.y][current.first.x] = current.second;
+                if (jarak[current.first.y][current.first.x+1] == INF && petak[current.first.y][current.first.x+1] == ' ')
+                    Q.push({{current.first.x+1,current.first.y},current.second+1});
+                if (jarak[current.first.y][current.first.x-1] == INF && petak[current.first.y][current.first.x-1] == ' ')
+                    Q.push({{current.first.x-1,current.first.y},current.second+1});
+                if (jarak[current.first.y+1][current.first.x] == INF && petak[current.first.y+1][current.first.x] == ' ')
+                    Q.push({{current.first.x,current.first.y+1},current.second+1});
+                if (jarak[current.first.y-1][current.first.x] == INF && petak[current.first.y-1][current.first.x] == ' ')
+                    Q.push({{current.first.x,current.first.y-1},current.second+1});
+            }
+        }
+    
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++)
+                printf("%5d ", jarak[i][j] == INF ? 999 : jarak[i][j]);
+            printf("\n");
+        }
+    	
+    	return 0;
+    }
