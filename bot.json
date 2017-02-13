@@ -3,6 +3,6 @@
     "Email":"jauhararifin@gmail.com",
     "NickName" :"Jauhar",
     "BotType": "CPlusPlus",
-    "ProjectLocation" : "",
-    "RunFile" : "bot.exe"
+    "ProjectLocation" : ".",
+    "RunFile" : "bin\\bot.exe"
 }

@@ -7,6 +7,9 @@ DEPS =  include/bomb.h \
 		include/location.h \
 		include/player.h \
 
+run: bin/bot.exe
+	gameengine/Bomberman.exe -b . bot-reference --pretty
+
 bin/%.o: src/%.cpp $(DEPS)
 	g++ -Iinclude -c -o bin/$@ $< -std=c++11
 
