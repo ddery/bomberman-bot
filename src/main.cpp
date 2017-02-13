@@ -156,8 +156,8 @@ int main(int argc, char** argv) {
                 arah = GameState::GO_LEFT;
             else if (tujuan.y < me->location.y)
                 arah = GameState::GO_UP;
-            else if (tujuan.y < me->location.y)
-                arah = GameState::GO_RIGHT;
+            else if (tujuan.y > me->location.y)
+                arah = GameState::GO_DOWN;
         }
         gamestate.decide_move(arah);
     }
