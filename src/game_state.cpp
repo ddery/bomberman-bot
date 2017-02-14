@@ -22,6 +22,7 @@ const int GameState::PUT_BOMB = 5;
 const int GameState::TRIGGER_BOMB = 6;
 
 const int GameState::OCCUPIEABLE = GameState::FREE | GameState::SUPER_POWER_UP | GameState::RADIUS_POWER_UP | GameState::BAG_POWER_UP;
+const int GameState::POWER_UP = GameState::SUPER_POWER_UP | GameState::RADIUS_POWER_UP | GameState::BAG_POWER_UP;
 
 void GameState::load_game_state(const char* file) {
   ifstream in(file);
@@ -82,6 +83,7 @@ void GameState::load_game_map(Json::Object* state_json) {
             cur_block->type = 0;
             cur_block->player = NULL;
             cur_block->bomb = NULL;
+            cur_block->powerup = NULL;
 
             if (block->get("Entity")->getType() == Json::T_OBJECT) {
                 Json::Object* entity_json = (Json::Object*) block->get("Entity");
@@ -110,6 +112,25 @@ void GameState::load_game_map(Json::Object* state_json) {
 
                 cur_block->type |= GameState::BOMB;
                 cur_block->bomb = bomb;
+            }
+			
+            if (block->get("PowerUp")->getType() == Json::T_OBJECT) {
+                Json::Object* powerup_json = (Json::Object*) block->get("PowerUp");
+                string type = ((Json::String*) powerup_json->get("$type"))->value();
+				int tipe;
+                if (type == "Domain.Entities.PowerUps.SuperPowerUp, Domain")
+                    tipe = GameState::SUPER_POWER_UP;
+                else if (type == "Domain.Entities.PowerUps.BombRaduisPowerUpEntity, Domain")
+                    tipe = GameState::RADIUS_POWER_UP;
+                else if (type == "Domain.Entities.PowerUps.BombBagPowerUpEntity, Domain")
+                    tipe = GameState::BAG_POWER_UP;
+				
+				cur_block->type |= tipe;
+				
+				PowerUp* powerup = new PowerUp(tipe,{location_x, location_y});
+				this->powerups.push_back(*powerup);
+				
+				cur_block->powerup = powerup;
             }
 
             if (cur_block->type == 0)
@@ -159,6 +180,10 @@ vector<Player> GameState::get_player_vector() {
 
 vector<Bomb> GameState::get_bomb_vector() {
     return this->bombs;
+}
+
+vector<PowerUp> GameState::get_powerup_vector() {
+    return this->powerups;
 }
 
 Entity* GameState::operator[] (int index) {

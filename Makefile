@@ -6,6 +6,7 @@ DEPS =  include/bomb.h \
 		include/json.hpp \
 		include/location.h \
 		include/player.h \
+		include/powerup.h \
 
 run: bin/bot.exe
 	gameengine/Bomberman.exe -b . 18plusplus --pretty
@@ -13,5 +14,5 @@ run: bin/bot.exe
 bin/%.o: src/%.cpp $(DEPS)
 	g++ -Iinclude -c -o $@ $< -std=c++11
 
-build: bin/algorithm.o bin/bomb.o bin/game_state.o bin/player.o bin/main.o
-	g++ -Iinclude bin/algorithm.o bin/bomb.o bin/game_state.o bin/player.o bin/main.o -o bin/bot -std=c++11
+build: bin/algorithm.o bin/bomb.o bin/game_state.o bin/player.o bin/main.o bin/powerup.o
+	g++ -Iinclude bin/algorithm.o bin/bomb.o bin/game_state.o bin/player.o bin/main.o bin/powerup.o -o bin/bot -std=c++11
