@@ -76,11 +76,9 @@ int** generate_kena_bomb(GameState& gamestate) {
 		}
     }
 
-
-    for (int i = 1; i <= height; i++) {
-        for (int j = 1; j <= width; j++)
-            res[i][j] = (res[i][j] == 999) ? 0:res[i][j];
-    }
+	for(int i = 1; i <= gamestate.get_map_height(); i++)
+		for(int j = 1; j <= gamestate.get_map_width(); j++)
+			res[i][j] = res[i][j]==999 ? 0 : res[i][j];
 
     return res;
 }
@@ -93,41 +91,54 @@ pair<int,int>** cari_jarak_arah(GameState& gamestate){
         for (int j = 1; j <= gamestate.get_map_width(); j++){
             jarak[i][j].first = INF;
             jarak[i][j].second = GameState::DO_NOTHING;
-		}
+		    }
     }
     Player* me = gamestate.get_me();
+	int** kena_bomb = generate_kena_bomb(gamestate);
 
     int arah = GameState::DO_NOTHING;
     int cur = 0;
     int x = me->location.x;
     int y = me->location.y;
 
-    queue<pair<pair<Location, int>,int> > q;
-    q.push({{{x,y},cur},arah});
+    priority_queue<pair<pair<int, Location>,int> > q;
+    q.push({{cur,{x,y}},arah});
+	jarak[y][x].first = cur;
+	jarak[y][x].second = arah;
+
     while(!q.empty()){
-		pair<pair<Location, int>,int> t = q.front(); q.pop();
-		x = t.first.first.x;
-		y = t.first.first.y;
-		cur = t.first.second;
-		if((gamestate[y+1][x].type & GameState::OCCUPIEABLE) && jarak[y+1][x].first==INF){
-			jarak[y+1][x].first = cur+1;
+		pair<pair<int, Location>,int> t = q.top(); q.pop();
+		x = t.first.second.x;
+		y = t.first.second.y;
+		cur = t.first.first*(-1);
+		int next_langkah = cur+1;
+		if((gamestate[y+1][x].type & (GameState::OCCUPIEABLE | GameState::BRICK)) && jarak[y+1][x].first==INF){
+			jarak[y+1][x].first = (gamestate[y+1][x].type & GameState::BRICK) ? next_langkah+8 : next_langkah;
 			jarak[y+1][x].second = t.second == GameState::DO_NOTHING ? GameState::GO_DOWN : t.second;
-			q.push({{{x,y+1},cur+1},jarak[y+1][x].second});
+			if((kena_bomb[y+1][x] < jarak[y+1][x].first) && kena_bomb[y+1][x] != 0)
+				jarak[y+1][x].second = GameState::DO_NOTHING;
+			q.push({{jarak[y+1][x].first*(-1),{x,y+1}},jarak[y+1][x].second});
 		}
-		if((gamestate[y][x+1].type & GameState::OCCUPIEABLE) && jarak[y][x+1].first==INF){
-			jarak[y][x+1].first = cur+1;
+		if((gamestate[y][x+1].type & (GameState::OCCUPIEABLE | GameState::BRICK)) && jarak[y][x+1].first==INF){
+			jarak[y][x+1].first = (gamestate[y][x+1].type & GameState::BRICK) ? next_langkah+8 : next_langkah;
 			jarak[y][x+1].second = t.second == GameState::DO_NOTHING ? GameState::GO_RIGHT : t.second;
-			q.push({{{x+1,y},cur+1},jarak[y][x+1].second});
+			if((kena_bomb[y][x+1] < jarak[y][x+1].first) && kena_bomb[y][x+1] != 0)
+				jarak[y][x+1].second = GameState::DO_NOTHING;
+			q.push({{jarak[y][x+1].first*(-1),{x+1,y}},jarak[y][x+1].second});
 		}
-		if((gamestate[y-1][x].type & GameState::OCCUPIEABLE) && jarak[y-1][x].first==INF){
-			jarak[y-1][x].first = cur+1;
+		if((gamestate[y-1][x].type & (GameState::OCCUPIEABLE | GameState::BRICK)) && jarak[y-1][x].first==INF){
+			jarak[y-1][x].first = (gamestate[y-1][x].type & GameState::BRICK) ? next_langkah+8 : next_langkah;
 			jarak[y-1][x].second = t.second == GameState::DO_NOTHING ? GameState::GO_UP : t.second;
-			q.push({{{x,y-1},cur+1},jarak[y-1][x].second});
+			if((kena_bomb[y-1][x] < jarak[y-1][x].first)  && kena_bomb[y-1][x] != 0)
+				jarak[y-1][x].second = GameState::DO_NOTHING;
+			q.push({{jarak[y-1][x].first*(-1),{x,y-1}},jarak[y-1][x].second});
 		}
-		if((gamestate[y][x-1].type & GameState::OCCUPIEABLE) && jarak[y][x-1].first==INF){
-			jarak[y][x-1].first = cur+1;
+		if((gamestate[y][x-1].type & (GameState::OCCUPIEABLE | GameState::BRICK)) && jarak[y][x-1].first==INF){
+			jarak[y][x-1].first = (gamestate[y][x-1].type & GameState::BRICK) ? next_langkah+8 : next_langkah;
 			jarak[y][x-1].second = t.second == GameState::DO_NOTHING ? GameState::GO_LEFT : t.second;
-			q.push({{{x-1,y},cur+1},jarak[y][x-1].second});
+			if((kena_bomb[y][x-1] < jarak[y][x-1].first) && kena_bomb[y][x-1] != 0)
+				jarak[y][x-1].second = GameState::DO_NOTHING;
+			q.push({{jarak[y][x-1].first*(-1),{x-1,y}},jarak[y][x-1].second});
 		}
 	}
 

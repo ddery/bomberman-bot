@@ -88,72 +88,99 @@ pair<Location,int> cari_tempat(GameState& gamestate, function<bool (int,int)> ob
 pair<int,int>** cari_jarak_arah(GameState& gamestate);
 
 int main(int argc, char** argv) {
-    GameState gamestate(argc,argv);
+  GameState gamestate(argc,argv);
 	Player* me=gamestate.get_me();
 	vector<Player> players=gamestate.get_player_vector();
+  vector<PowerUp> powerups = gamestate.get_powerup_vector();
 
 	debug_map(gamestate);
 	int** kena_bomb = generate_kena_bomb(gamestate);
 	int** powerup = generate_powerup(gamestate);
 
+	pair<int,int> ** jarak_arah = cari_jarak_arah(gamestate);
+
 	for(int i=1;i<=gamestate.get_map_height();i++){
 		for(int j=1;j<=gamestate.get_map_width();j++)
-			printf("%5d",powerup[i][j]);
+			printf("%3d",powerup[i][j]);
+		cout<<endl;
+	}
+  cout << endl;
+  for(int i=1;i<=gamestate.get_map_height();i++){
+  		for(int j=1;j<=gamestate.get_map_width();j++)
+  		printf("%3d",kena_bomb[i][j]);
+  	cout<<endl;
+  }
+
+	for(int i=1;i<=gamestate.get_map_height();i++){
+		for(int j=1;j<=gamestate.get_map_width();j++)
+			printf("%3d ",jarak_arah[i][j].first);
 		cout<<endl;
 	}
 
-	if (kena_bomb[me->location.y][me->location.x]>0){
-		pair<Location,int> aman = cari_tempat(gamestate, [&] (int x,int y){ return !kena_bomb[y][x];});
-		cout<<"Tempat aman : ("<<aman.first.x<<","<<aman.first.y<<") -> "<<aman.second<<endl;
-        gamestate.decide_move(aman.second);
-	} else {
-        Player* op = NULL;
-        for (Player player : players)
-            if (player.key != me->key) {
-                op = &player;
-                break;
-            }
+  for(int i=1;i<=gamestate.get_map_height();i++){
+		for(int j=1;j<=gamestate.get_map_width();j++)
+			printf("%3d ",jarak_arah[i][j].second);
+		cout<<endl;
+	}
 
-        Location tujuan = me->location;
-        if (me->location.x < op->location.x && !(gamestate[me->location.y][me->location.x+1].type & GameState::WALL))
-            tujuan = (Location) {me->location.x+1, me->location.y};
-        else if (me->location.x > op->location.x && !(gamestate[me->location.y][me->location.x-1].type & GameState::WALL))
-            tujuan = (Location) {me->location.x-1, me->location.y};
-        else if (me->location.y < op->location.y && !(gamestate[me->location.y+1][me->location.x].type & GameState::WALL))
-            tujuan = (Location) {me->location.x, me->location.y+1};
-        else if (me->location.y > op->location.y && !(gamestate[me->location.y-1][me->location.x].type & GameState::WALL))
-            tujuan = (Location) {me->location.x, me->location.y-1};
-        else {
-            int random[] = {0,1,2,3}; random_shuffle(random, random + 4);
-            for (int test : random) {
-                bool b = false;
-                switch (test) {
-                    case 0: if (!(gamestate[me->location.y][me->location.x+1].type & GameState::WALL)) { b = true; tujuan = (Location) {me->location.x+1, me->location.y}; } break;
-                    case 1: if (!(gamestate[me->location.y][me->location.x-1].type & GameState::WALL)) { b = true; tujuan = (Location) {me->location.x-1, me->location.y}; } break;
-                    case 2: if (!(gamestate[me->location.y+1][me->location.x].type & GameState::WALL)) { b = true; tujuan = (Location) {me->location.x, me->location.y+1}; } break;
-                    case 3: if (!(gamestate[me->location.y-1][me->location.x].type & GameState::WALL)) { b = true; tujuan = (Location) {me->location.x, me->location.y-1}; } break;
-                }
-                if (b) break;
-            }
-        }
+  Player* op = NULL;
+  for (Player player : players)
+      if (player.key != me->key) {
+          op = &player;
+          break;
+      }
 
-        cout<<"Tujuan : "<<tujuan.x<<","<<tujuan.y<<endl;
+  Location tujuan = op->location;
 
-        int arah = GameState::DO_NOTHING;
-        if (!kena_bomb[tujuan.y][tujuan.x]) {
-            if (gamestate[tujuan.y][tujuan.x].type & GameState::BRICK)
-                arah = GameState::PUT_BOMB;
-            else if (tujuan.x > me->location.x)
-                arah = GameState::GO_RIGHT;
-            else if (tujuan.x < me->location.x)
-                arah = GameState::GO_LEFT;
-            else if (tujuan.y < me->location.y)
-                arah = GameState::GO_UP;
-            else if (tujuan.y > me->location.y)
-                arah = GameState::GO_DOWN;
-        }
-        gamestate.decide_move(arah);
+  if(powerups.size() != 0){
+    int jarakpowerup = jarak_arah[powerups[0].location.y][powerups[0].location.x].first;
+    tujuan = powerups[0].location;
+    for (int i = 1; i < powerups.size(); i++) {
+      if(jarakpowerup > jarak_arah[powerups[i].location.y][powerups[i].location.x].first){
+        jarakpowerup = jarak_arah[powerups[i].location.y][powerups[i].location.x].first;
+        tujuan.x = powerups[i].location.x;
+        tujuan.y = powerups[i].location.y;
+      }
     }
+  }
+
+  cout << "Tujuan Power Up : "<<tujuan.x << ',';
+  cout << tujuan.y << '\n';
+
+  int arah = jarak_arah[tujuan.y][tujuan.x].second;
+
+  cout << "Arah Power Up : " <<arah << endl;
+
+  if (kena_bomb[me->location.y][me->location.x] != 0) {
+    /*if(jarak_arah[tujuan.y][tujuan.x].second != GameState::DO_NOTHING){
+      gamestate.decide_move(arah);
+    }else{*/
+      int jarakhindar = 999;
+      for (int i = 1; i <= gamestate.get_map_height(); i++) {
+        for (int j = 1; j <= gamestate.get_map_width(); j++) {
+          if (jarakhindar > jarak_arah[i][j].first && kena_bomb[i][j] == 0) {
+              jarakhindar = jarak_arah[i][j].first;
+              tujuan.x = j;
+              tujuan.y = i;
+          }
+        }
+      }
+      cout <<"Tujuan Menghindar : " <<tujuan.x << ',';
+      cout << tujuan.y << '\n';
+      cout <<"Arah Menghindar : " << jarak_arah[tujuan.y][tujuan.x].second << '\n';
+      gamestate.decide_move(jarak_arah[tujuan.y][tujuan.x].second);
+    //}
+  }else{
+    if (arah ==  GameState::GO_RIGHT && (gamestate[me->location.y][me->location.x+1].type & GameState::BRICK))
+        arah = GameState::PUT_BOMB;
+    else if (arah ==  GameState::GO_LEFT && (gamestate[me->location.y][me->location.x-1].type & GameState::BRICK))
+        arah = GameState::PUT_BOMB;
+    else if (arah ==  GameState::GO_DOWN && (gamestate[me->location.y+1][me->location.x].type & GameState::BRICK))
+        arah = GameState::PUT_BOMB;
+    else if (arah ==  GameState::GO_UP && (gamestate[me->location.y-1][me->location.x].type & GameState::BRICK))
+        arah = GameState::PUT_BOMB;
+    gamestate.decide_move(arah);
+  }
 
     return 0;
 }

@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include "game_state.h"
 #include "json.hpp"
+#include "location.h"
 
 using namespace std;
 
@@ -23,6 +24,10 @@ const int GameState::TRIGGER_BOMB = 6;
 
 const int GameState::OCCUPIEABLE = GameState::FREE | GameState::SUPER_POWER_UP | GameState::RADIUS_POWER_UP | GameState::BAG_POWER_UP;
 const int GameState::POWER_UP = GameState::SUPER_POWER_UP | GameState::RADIUS_POWER_UP | GameState::BAG_POWER_UP;
+
+bool operator<(const Location& a, const Location& b) {
+	return a.x == b.x ? a.y < b.y : a.x < b.x;
+}
 
 void GameState::load_game_state(const char* file) {
   ifstream in(file);
