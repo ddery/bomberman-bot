@@ -93,6 +93,19 @@ pair<Location,int> cari_tempat(GameState& gamestate, function<bool (int,int)> ob
     return make_pair(lokasi,arah);
 }
 
+/*
+ * jarak_arah
+ * author : Dery Rahman
+ * tanggal : 14 Februari 2016
+ * digunakan untuk mendapatkan jarak dari player "me" ke semua petak di peta
+ * dalam representasi matriks berukuran seperti peta yang bertipe pair<int,int>.
+ * nilai first menunjukkan jarak dari posisi player sekarang, second menunjukkan
+ * langkah yang harus dituju untuk menuju ke posisi yang bersangkutan
+ * gamestate : berisi game state
+ * return : pair<int,int>* yang merepresentasikan matriks
+ */
+pair<int,int>** jarak_arah(GameState& gamestate);
+
 int main(int argc, char** argv) {
     GameState gamestate(argc, argv);
     Player* me = gamestate.get_me();
