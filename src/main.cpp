@@ -6,7 +6,6 @@ using namespace std;
 void debug_map(GameState& gamestate) {
     int width = gamestate.get_map_width();
     int height = gamestate.get_map_height();
-
     for (int i = 1; i <= height; i++) {
         for (int j = 1; j <= width; j++)
             if (gamestate[i][j].type & GameState::FREE)
@@ -19,38 +18,20 @@ void debug_map(GameState& gamestate) {
                 cout<<"+";
             else if (gamestate[i][j].type & GameState::WALL)
                 cout<<"#";
+            else if (gamestate[i][j].type & GameState::SUPER_POWER_UP)
+                cout<<"$";
+            else if (gamestate[i][j].type & GameState::RADIUS_POWER_UP)
+                cout<<"!";
+            else if (gamestate[i][j].type & GameState::BAG_POWER_UP)
+                cout<<"&";
             else
                 cout<<gamestate[i][j].type;
         cout<<endl;
     }
 }
 
-bool** generate_kena_bomb(GameState& gamestate) {
-    int width = gamestate.get_map_width();
-    int height = gamestate.get_map_height();
-
-    bool **res = new bool*[height + 1];
-    for (int i = 1; i <= height; i++) {
-        res[i] = new bool[width+1];
-        for (int j = 1; j <= width; j++)
-            res[i][j] = false;
-    }
-
-    for (Bomb bomb : gamestate.get_bomb_vector()) {
-        res[bomb.location.y][bomb.location.x] = true;
-        int bomb_occupy = GameState::OCCUPIEABLE | GameState::PLAYER;
-        for (int i = 1; i <= bomb.radius && (gamestate[bomb.location.y][bomb.location.x+i].type & bomb_occupy); i++)
-            res[bomb.location.y][bomb.location.x+i] = true;
-        for (int i = 1; i <= bomb.radius && (gamestate[bomb.location.y][bomb.location.x-i].type & bomb_occupy); i++)
-            res[bomb.location.y][bomb.location.x-i] = true;
-        for (int i = 1; i <= bomb.radius && (gamestate[bomb.location.y+1][bomb.location.x].type & bomb_occupy); i++)
-            res[bomb.location.y+i][bomb.location.x] = true;
-        for (int i = 1; i <= bomb.radius && (gamestate[bomb.location.y-1][bomb.location.x].type & bomb_occupy); i++)
-            res[bomb.location.y-i][bomb.location.x] = true;
-    }
-
-    return res;
-}
+int** generate_powerup(GameState& gamestate);
+int** generate_kena_bomb(GameState& gamestate);
 
 pair<Location,int> cari_tempat(GameState& gamestate, function<bool (int,int)> objective) {
     bool** visited = new bool*[gamestate.get_map_height()+1];
@@ -94,7 +75,7 @@ pair<Location,int> cari_tempat(GameState& gamestate, function<bool (int,int)> ob
 }
 
 /*
- * jarak_arah
+ * cari_jarak_arah
  * author : Dery Rahman
  * tanggal : 14 Februari 2016
  * digunakan untuk mendapatkan jarak dari player "me" ke semua petak di peta
@@ -104,29 +85,28 @@ pair<Location,int> cari_tempat(GameState& gamestate, function<bool (int,int)> ob
  * gamestate : berisi game state
  * return : pair<int,int>* yang merepresentasikan matriks
  */
-pair<int,int>** jarak_arah(GameState& gamestate);
+pair<int,int>** cari_jarak_arah(GameState& gamestate);
 
 int main(int argc, char** argv) {
-    GameState gamestate(argc, argv);
-    Player* me = gamestate.get_me();
-    vector<Player> players = gamestate.get_player_vector();
+    GameState gamestate(argc,argv);
+	Player* me=gamestate.get_me();
+	vector<Player> players=gamestate.get_player_vector();
 
-    bool** kena_bomb = generate_kena_bomb(gamestate);
+	debug_map(gamestate);
+	int** kena_bomb = generate_kena_bomb(gamestate);
+	int** powerup = generate_powerup(gamestate);
 
-    debug_map(gamestate);
-    for (int i = 1; i <= gamestate.get_map_height(); i++) {
-        for (int j = 1; j <= gamestate.get_map_width(); j++)
-            cout<<kena_bomb[i][j];
-        cout<<endl;
-    }
+	for(int i=1;i<=gamestate.get_map_height();i++){
+		for(int j=1;j<=gamestate.get_map_width();j++)
+			printf("%5d",powerup[i][j]);
+		cout<<endl;
+	}
 
-    srand(time(0));
-
-    if (kena_bomb[me->location.y][me->location.x]) {
-        pair<Location,int> aman = cari_tempat(gamestate, [&] (int x,int y){ return !kena_bomb[y][x];});
-        cout<<"Tempat aman : ("<<aman.first.x<<","<<aman.first.y<<") -> "<<aman.second<<endl;
+	if (kena_bomb[me->location.y][me->location.x]>0){
+		pair<Location,int> aman = cari_tempat(gamestate, [&] (int x,int y){ return !kena_bomb[y][x];});
+		cout<<"Tempat aman : ("<<aman.first.x<<","<<aman.first.y<<") -> "<<aman.second<<endl;
         gamestate.decide_move(aman.second);
-    } else {
+	} else {
         Player* op = NULL;
         for (Player player : players)
             if (player.key != me->key) {

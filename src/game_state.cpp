@@ -113,7 +113,7 @@ void GameState::load_game_map(Json::Object* state_json) {
                 cur_block->type |= GameState::BOMB;
                 cur_block->bomb = bomb;
             }
-			
+
             if (block->get("PowerUp")->getType() == Json::T_OBJECT) {
                 Json::Object* powerup_json = (Json::Object*) block->get("PowerUp");
                 string type = ((Json::String*) powerup_json->get("$type"))->value();
@@ -124,12 +124,12 @@ void GameState::load_game_map(Json::Object* state_json) {
                     tipe = GameState::RADIUS_POWER_UP;
                 else if (type == "Domain.Entities.PowerUps.BombBagPowerUpEntity, Domain")
                     tipe = GameState::BAG_POWER_UP;
-				
+
 				cur_block->type |= tipe;
-				
+
 				PowerUp* powerup = new PowerUp(tipe,{location_x, location_y});
 				this->powerups.push_back(*powerup);
-				
+
 				cur_block->powerup = powerup;
             }
 

@@ -6,6 +6,7 @@
 #include "bomb.h"
 #include "entity.h"
 #include "json.hpp"
+#include "powerup.h"
 
 using namespace std;
 
@@ -33,6 +34,7 @@ class GameState {
     static const int TRIGGER_BOMB;
 
     static const int OCCUPIEABLE;
+    static const int POWER_UP;
 
     Player* get_player_by_key(char key);
     Player* get_me();
@@ -42,6 +44,7 @@ class GameState {
     int get_round();
     vector<Player> get_player_vector();
     vector<Bomb> get_bomb_vector();
+    vector<PowerUp> get_powerup_vector();
 
     Entity* operator[] (int);
 
@@ -57,6 +60,7 @@ class GameState {
     Player *me;
     vector<Player> players;
     vector<Bomb> bombs;
+    vector<PowerUp> powerups;
 
     void load_game_state(const char*);
     void load_game_player(Json::Object*);
