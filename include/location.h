@@ -5,4 +5,6 @@ typedef struct {
     int x,y;
 } Location;
 
+bool operator<(const Location& a, const Location& b);
+
 #endif
