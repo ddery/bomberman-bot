@@ -100,28 +100,24 @@ int main(int argc, char** argv) {
     printf("Arah : %d\n", arah);
 
     if (kena_bomb[me->location.y][me->location.x] > 0) {
-        if(jarak_arah[tujuan.y][tujuan.x].second != GameState::DO_NOTHING && !(gamestate[tujuan.y][tujuan.x].type & GameState::OCCUPIEABLE))
-            gamestate.decide_move(arah);
-        else {
-            int jarakhindar = 999;
-            for (int i = 1; i <= gamestate.get_map_height(); i++)
-                for (int j = 1; j <= gamestate.get_map_width(); j++)
-                    if (jarakhindar > jarak_arah[i][j].first && kena_bomb[i][j] == 0) {
-                        jarakhindar = jarak_arah[i][j].first;
-                        tujuan.x = j;
-                        tujuan.y = i;
-                    }
-            printf("Tujuan menghindar (%d,%d) -> %d\n", tujuan.x, tujuan.y, jarak_arah[tujuan.y][tujuan.x].second);
-            gamestate.decide_move(jarak_arah[tujuan.y][tujuan.x].second);
-        }
+        int jarakhindar = 999;
+        for (int i = 1; i <= gamestate.get_map_height(); i++)
+            for (int j = 1; j <= gamestate.get_map_width(); j++)
+                if (jarakhindar > jarak_arah[i][j].first && kena_bomb[i][j] == 0) {
+                    jarakhindar = jarak_arah[i][j].first;
+                    tujuan.x = j;
+                    tujuan.y = i;
+                }
+        printf("Tujuan menghindar (%d,%d) -> %d\n", tujuan.x, tujuan.y, jarak_arah[tujuan.y][tujuan.x].second);
+        gamestate.decide_move(jarak_arah[tujuan.y][tujuan.x].second);
     } else {
-        if (arah ==  GameState::GO_RIGHT && (gamestate[me->location.y][me->location.x+1].type & GameState::BRICK))
+        if (arah ==  GameState::GO_RIGHT && (gamestate[me->location.y][me->location.x+1].type & (GameState::BRICK | GameState::PLAYER)))
             arah = GameState::PUT_BOMB;
-        else if (arah ==  GameState::GO_LEFT && (gamestate[me->location.y][me->location.x-1].type & GameState::BRICK))
+        else if (arah ==  GameState::GO_LEFT && (gamestate[me->location.y][me->location.x-1].type & (GameState::BRICK | GameState::PLAYER)))
             arah = GameState::PUT_BOMB;
-        else if (arah ==  GameState::GO_DOWN && (gamestate[me->location.y+1][me->location.x].type & GameState::BRICK))
+        else if (arah ==  GameState::GO_DOWN && (gamestate[me->location.y+1][me->location.x].type & (GameState::BRICK | GameState::PLAYER)))
             arah = GameState::PUT_BOMB;
-        else if (arah ==  GameState::GO_UP && (gamestate[me->location.y-1][me->location.x].type & GameState::BRICK))
+        else if (arah ==  GameState::GO_UP && (gamestate[me->location.y-1][me->location.x].type & (GameState::BRICK | GameState::PLAYER)))
             arah = GameState::PUT_BOMB;
         gamestate.decide_move(arah);
     }

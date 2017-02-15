@@ -106,7 +106,7 @@ pair<int,int>** cari_jarak_arah(GameState& gamestate){
             int _a = action[i];
             int _jarak = (gamestate[_y][_x].type & GameState::BRICK) ? next_langkah + 8 : next_langkah;
 
-            if (gamestate[_y][_x].type & (GameState::OCCUPIEABLE | GameState::BRICK)){
+            if (gamestate[_y][_x].type & (GameState::OCCUPIEABLE | GameState::BRICK | GameState::PLAYER)){
                 if (jarak[_y][_x].first > _jarak) {
                     jarak[_y][_x].first = _jarak;
                     jarak[_y][_x].second = t.second == me->location ? _a : jarak[y][x].second;
