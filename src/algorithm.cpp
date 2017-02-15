@@ -7,29 +7,6 @@ bool cmp(Bomb& a, Bomb& b) {
     return a.time_left < b.time_left;
 };
 
-int** generate_powerup(GameState& gamestate) {
-	int width = gamestate.get_map_width();
-    int height = gamestate.get_map_height();
-
-	int** res = new int*[height + 1];
-    for (int i = 1; i <= height; i++) {
-        res[i] = new int[width+1];
-        for (int j = 1; j <= width; j++)
-            res[i][j] = 0;
-    }
-
-	vector<PowerUp> powerups = gamestate.get_powerup_vector();
-
-	for (PowerUp powerup : powerups) {
-		int y = powerup.location.y;
-		int x = powerup.location.x;
-
-		res[y][x]=powerup.type;
-	}
-
-	return res;
-}
-
 int** generate_kena_bomb(GameState& gamestate) {
     int width = gamestate.get_map_width();
     int height = gamestate.get_map_height();
@@ -54,26 +31,20 @@ int** generate_kena_bomb(GameState& gamestate) {
 
         res[y][x] = min(res[y][x],time);
         int bomb_occupy = GameState::OCCUPIEABLE | GameState::PLAYER | GameState::BOMB;
-        for (int i = 1; i <= bomb.radius && (gamestate[y][x+i].type & bomb_occupy); i++) {
-            res[y][x+i] = min(res[y][x+i],time);
-			if (gamestate[y][x+i].type & GameState::BOMB)
-				break;
-		}
-        for (int i = 1; i <= bomb.radius && (gamestate[y][x-i].type & bomb_occupy); i++){
-            res[y][x-i] = min(res[y][x-i],time);
-			if (gamestate[y][x-i].type & GameState::BOMB)
-				break;
-		}
-        for (int i = 1; i <= bomb.radius && (gamestate[y+i][x].type & bomb_occupy); i++){
-            res[y+i][x] = min(res[y+i][x],time);
-			if (gamestate[y+i][x].type & GameState::BOMB)
-				break;
-		}
-        for (int i = 1; i <= bomb.radius && (gamestate[y-i][x].type & bomb_occupy); i++){
-            res[y-i][x] = min(res[y-i][x],time);
-			if (gamestate[y-i][x].type & GameState::BOMB)
-				break;
-		}
+
+        int direction_x[4] = {0,0,1,-1};
+        int direction_y[4] = {1,-1,0,0};
+
+        for (int _i = 0; _i < 4; _i++) {
+            int _x = direction_x[_i];
+            int _y = direction_y[_i];
+
+            for (int i = 1; i <= bomb.radius && (gamestate[y+i*_y][x+i*_x].type & bomb_occupy); i++) {
+                res[y+i*_y][x+i*_x] = min(res[y+i*_y][x+i*_x],time);
+    		    if (gamestate[y+i*_y][x+i*_x].type & GameState::BOMB)
+                    break;
+    		}
+        }
     }
 
 	for(int i = 1; i <= gamestate.get_map_height(); i++)
@@ -84,63 +55,72 @@ int** generate_kena_bomb(GameState& gamestate) {
 }
 
 pair<int,int>** cari_jarak_arah(GameState& gamestate){
-	const int INF=999;
+    const int INF=999;
+
     pair<int,int>** jarak = new pair<int,int>*[gamestate.get_map_height()+1];
     for (int i = 1; i <= gamestate.get_map_height(); i++) {
         jarak[i] = new pair<int,int>[gamestate.get_map_width()+1];
         for (int j = 1; j <= gamestate.get_map_width(); j++){
             jarak[i][j].first = INF;
             jarak[i][j].second = GameState::DO_NOTHING;
-		    }
+        }
     }
     Player* me = gamestate.get_me();
 	int** kena_bomb = generate_kena_bomb(gamestate);
+    for (int i = 1; i <= gamestate.get_map_height(); i++)
+        for (int j = 1; j <= gamestate.get_map_width(); j++)
+            if (kena_bomb[i][j] == 0)
+                kena_bomb[i][j] = INF;
 
     int arah = GameState::DO_NOTHING;
     int cur = 0;
     int x = me->location.x;
     int y = me->location.y;
+    jarak[y][x].first = 0;
 
-    priority_queue<pair<pair<int, Location>,int> > q;
-    q.push({{cur,{x,y}},arah});
-	jarak[y][x].first = cur;
-	jarak[y][x].second = arah;
+    bool **visited = new bool*[gamestate.get_map_height()+1];
+    for (int i = 1; i <= gamestate.get_map_height(); i++)
+        visited[i] = new bool[gamestate.get_map_width()]();
 
+    priority_queue<pair<int, Location> > q;
+    q.push(make_pair(cur,(Location) {x,y}));
     while(!q.empty()){
-		pair<pair<int, Location>,int> t = q.top(); q.pop();
-		x = t.first.second.x;
-		y = t.first.second.y;
-		cur = t.first.first*(-1);
+		pair<int, Location> t = q.top(); q.pop();
+
+        x = t.second.x;
+		y = t.second.y;
+		cur = -t.first;
 		int next_langkah = cur+1;
-		if((gamestate[y+1][x].type & (GameState::OCCUPIEABLE | GameState::BRICK)) && jarak[y+1][x].first==INF){
-			jarak[y+1][x].first = (gamestate[y+1][x].type & GameState::BRICK) ? next_langkah+8 : next_langkah;
-			jarak[y+1][x].second = t.second == GameState::DO_NOTHING ? GameState::GO_DOWN : t.second;
-			if((kena_bomb[y+1][x] < jarak[y+1][x].first) && kena_bomb[y+1][x] != 0)
-				jarak[y+1][x].second = GameState::DO_NOTHING;
-			q.push({{jarak[y+1][x].first*(-1),{x,y+1}},jarak[y+1][x].second});
-		}
-		if((gamestate[y][x+1].type & (GameState::OCCUPIEABLE | GameState::BRICK)) && jarak[y][x+1].first==INF){
-			jarak[y][x+1].first = (gamestate[y][x+1].type & GameState::BRICK) ? next_langkah+8 : next_langkah;
-			jarak[y][x+1].second = t.second == GameState::DO_NOTHING ? GameState::GO_RIGHT : t.second;
-			if((kena_bomb[y][x+1] < jarak[y][x+1].first) && kena_bomb[y][x+1] != 0)
-				jarak[y][x+1].second = GameState::DO_NOTHING;
-			q.push({{jarak[y][x+1].first*(-1),{x+1,y}},jarak[y][x+1].second});
-		}
-		if((gamestate[y-1][x].type & (GameState::OCCUPIEABLE | GameState::BRICK)) && jarak[y-1][x].first==INF){
-			jarak[y-1][x].first = (gamestate[y-1][x].type & GameState::BRICK) ? next_langkah+8 : next_langkah;
-			jarak[y-1][x].second = t.second == GameState::DO_NOTHING ? GameState::GO_UP : t.second;
-			if((kena_bomb[y-1][x] < jarak[y-1][x].first)  && kena_bomb[y-1][x] != 0)
-				jarak[y-1][x].second = GameState::DO_NOTHING;
-			q.push({{jarak[y-1][x].first*(-1),{x,y-1}},jarak[y-1][x].second});
-		}
-		if((gamestate[y][x-1].type & (GameState::OCCUPIEABLE | GameState::BRICK)) && jarak[y][x-1].first==INF){
-			jarak[y][x-1].first = (gamestate[y][x-1].type & GameState::BRICK) ? next_langkah+8 : next_langkah;
-			jarak[y][x-1].second = t.second == GameState::DO_NOTHING ? GameState::GO_LEFT : t.second;
-			if((kena_bomb[y][x-1] < jarak[y][x-1].first) && kena_bomb[y][x-1] != 0)
-				jarak[y][x-1].second = GameState::DO_NOTHING;
-			q.push({{jarak[y][x-1].first*(-1),{x-1,y}},jarak[y][x-1].second});
-		}
+
+        if (visited[y][x])
+            continue;
+        visited[y][x] = true;
+
+        int direction_x[4] = {x,x,x+1,x-1};
+        int direction_y[4] = {y+1,y-1,y,y};
+        int action[4] = {GameState::GO_DOWN,GameState::GO_UP,GameState::GO_RIGHT,GameState::GO_LEFT};
+
+        for (int i = 0; i < 4; i++) {
+            int _y = direction_y[i];
+            int _x = direction_x[i];
+            int _a = action[i];
+            int _jarak = (gamestate[_y][_x].type & GameState::BRICK) ? next_langkah + 8 : next_langkah;
+
+            if (gamestate[_y][_x].type & (GameState::OCCUPIEABLE | GameState::BRICK)){
+                if (jarak[_y][_x].first > _jarak) {
+                    jarak[_y][_x].first = _jarak;
+                    jarak[_y][_x].second = t.second == me->location ? _a : jarak[y][x].second;
+                }
+    			if((kena_bomb[_y][_x]-1 <= jarak[_y][_x].first) && kena_bomb[_y][_x] > 0)
+    				jarak[_y][_x].second = GameState::DO_NOTHING;
+    			q.push(make_pair(-jarak[_y][_x].first,(Location) {_x,_y}));
+    		}
+        }
 	}
+
+    for (int i = 1; i <= gamestate.get_map_height(); i++)
+        delete visited[i];
+    delete visited;
 
 	return jarak;
 }

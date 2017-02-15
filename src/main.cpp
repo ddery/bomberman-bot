@@ -3,11 +3,16 @@
 
 using namespace std;
 
-void debug_map(GameState& gamestate) {
+void debug_map(GameState& gamestate, int** kena_bomb, pair<int,int>** jarak_arah) {
     int width = gamestate.get_map_width();
     int height = gamestate.get_map_height();
+
+    printf("   ");
+    for (int i = 1; i <= width; i++)
+        printf("%14d", i); printf("\n");
     for (int i = 1; i <= height; i++) {
-        for (int j = 1; j <= width; j++)
+        printf("%2d ", i);
+        for (int j = 1; j <= width; j++) {
             if (gamestate[i][j].type & GameState::FREE)
                 cout<<" ";
             else if (gamestate[i][j].type & GameState::BOMB)
@@ -26,53 +31,24 @@ void debug_map(GameState& gamestate) {
                 cout<<"&";
             else
                 cout<<gamestate[i][j].type;
+            printf("(%3d,%3d,%3d) ", kena_bomb[i][j], jarak_arah[i][j].first,jarak_arah[i][j].second);
+        }
         cout<<endl;
     }
 }
 
-int** generate_powerup(GameState& gamestate);
+/*
+ * generate_kena_bomb
+ * author : Dery Rahman
+ * tanggal : 13 Februari 2016
+ * digunakan untuk menciptakan matriks berukuran sama seperti map yang berisi
+ * integer. Integer tersebut menyatakan banyaknya detik yang tersisa sehingga
+ * petak yang bersangkutan akan meledak. matriks[y][x] menyatakan detik yang
+ * tersisa sehingga petak (x,y) meledak
+ * gamestate : berisi game state
+ * return int** yang merepresentasikan matriks
+ */
 int** generate_kena_bomb(GameState& gamestate);
-
-pair<Location,int> cari_tempat(GameState& gamestate, function<bool (int,int)> objective) {
-    bool** visited = new bool*[gamestate.get_map_height()+1];
-    for (int i = 1; i <= gamestate.get_map_height(); i++) {
-        visited[i] = new bool[gamestate.get_map_width()+1];
-        for (int j = 1; j <= gamestate.get_map_width(); j++)
-            visited[i][j] = false;
-    }
-    Player* me = gamestate.get_me();
-
-    int arah = GameState::DO_NOTHING;
-    Location lokasi = me->location;
-
-    queue<pair<Location,int> > que;
-    que.push(make_pair(me->location,GameState::DO_NOTHING));
-    while (!que.empty()) {
-        pair<Location,int> t = que.front(); que.pop();
-        if (objective(t.first.x,t.first.y)) {
-            arah = t.second;
-            lokasi = {t.first.x,t.first.y};
-            break;
-        }
-        if (visited[t.first.y][t.first.x])
-            continue;
-        visited[t.first.y][t.first.x] = true;
-        if ((gamestate[t.first.y][t.first.x+1].type & GameState::OCCUPIEABLE) && !visited[t.first.y][t.first.x+1])
-            que.push(make_pair((Location){.x=t.first.x+1,.y=t.first.y}, t.second == GameState::DO_NOTHING ? GameState::GO_RIGHT : t.second));
-        if ((gamestate[t.first.y][t.first.x-1].type & GameState::OCCUPIEABLE) && !visited[t.first.y][t.first.x-1])
-            que.push(make_pair((Location){.x=t.first.x-1,.y=t.first.y}, t.second == GameState::DO_NOTHING ? GameState::GO_LEFT : t.second));
-        if ((gamestate[t.first.y+1][t.first.x].type & GameState::OCCUPIEABLE) && !visited[t.first.y+1][t.first.x])
-            que.push(make_pair((Location){.x=t.first.x,.y=t.first.y+1}, t.second == GameState::DO_NOTHING ? GameState::GO_DOWN : t.second));
-        if ((gamestate[t.first.y-1][t.first.x].type & GameState::OCCUPIEABLE) && !visited[t.first.y-1][t.first.x])
-            que.push(make_pair((Location){.x=t.first.x,.y=t.first.y-1}, t.second == GameState::DO_NOTHING ? GameState::GO_UP : t.second));
-    }
-
-    for (int i = 1; i <= gamestate.get_map_height(); i++)
-        delete visited[i];
-    delete visited;
-
-    return make_pair(lokasi,arah);
-}
 
 /*
  * cari_jarak_arah
@@ -88,99 +64,67 @@ pair<Location,int> cari_tempat(GameState& gamestate, function<bool (int,int)> ob
 pair<int,int>** cari_jarak_arah(GameState& gamestate);
 
 int main(int argc, char** argv) {
-  GameState gamestate(argc,argv);
-	Player* me=gamestate.get_me();
-	vector<Player> players=gamestate.get_player_vector();
-  vector<PowerUp> powerups = gamestate.get_powerup_vector();
+    GameState gamestate(argc,argv);
 
-	debug_map(gamestate);
-	int** kena_bomb = generate_kena_bomb(gamestate);
-	int** powerup = generate_powerup(gamestate);
+    Player* me=gamestate.get_me();
+    vector<Player> players = gamestate.get_player_vector();
+    vector<PowerUp> powerups = gamestate.get_powerup_vector();
 
-	pair<int,int> ** jarak_arah = cari_jarak_arah(gamestate);
+    int** kena_bomb = generate_kena_bomb(gamestate);
+	pair<int,int> **jarak_arah = cari_jarak_arah(gamestate);
+    debug_map(gamestate, kena_bomb, jarak_arah);
 
-	for(int i=1;i<=gamestate.get_map_height();i++){
-		for(int j=1;j<=gamestate.get_map_width();j++)
-			printf("%3d",powerup[i][j]);
-		cout<<endl;
-	}
-  cout << endl;
-  for(int i=1;i<=gamestate.get_map_height();i++){
-  		for(int j=1;j<=gamestate.get_map_width();j++)
-  		printf("%3d",kena_bomb[i][j]);
-  	cout<<endl;
-  }
-
-	for(int i=1;i<=gamestate.get_map_height();i++){
-		for(int j=1;j<=gamestate.get_map_width();j++)
-			printf("%3d ",jarak_arah[i][j].first);
-		cout<<endl;
-	}
-
-  for(int i=1;i<=gamestate.get_map_height();i++){
-		for(int j=1;j<=gamestate.get_map_width();j++)
-			printf("%3d ",jarak_arah[i][j].second);
-		cout<<endl;
-	}
-
-  Player* op = NULL;
-  for (Player player : players)
-      if (player.key != me->key) {
-          op = &player;
-          break;
-      }
-
-  Location tujuan = op->location;
-
-  if(powerups.size() != 0){
-    int jarakpowerup = jarak_arah[powerups[0].location.y][powerups[0].location.x].first;
-    tujuan = powerups[0].location;
-    for (int i = 1; i < powerups.size(); i++) {
-      if(jarakpowerup > jarak_arah[powerups[i].location.y][powerups[i].location.x].first){
-        jarakpowerup = jarak_arah[powerups[i].location.y][powerups[i].location.x].first;
-        tujuan.x = powerups[i].location.x;
-        tujuan.y = powerups[i].location.y;
-      }
-    }
-  }
-
-  cout << "Tujuan Power Up : "<<tujuan.x << ',';
-  cout << tujuan.y << '\n';
-
-  int arah = jarak_arah[tujuan.y][tujuan.x].second;
-
-  cout << "Arah Power Up : " <<arah << endl;
-
-  if (kena_bomb[me->location.y][me->location.x] != 0) {
-    /*if(jarak_arah[tujuan.y][tujuan.x].second != GameState::DO_NOTHING){
-      gamestate.decide_move(arah);
-    }else{*/
-      int jarakhindar = 999;
-      for (int i = 1; i <= gamestate.get_map_height(); i++) {
-        for (int j = 1; j <= gamestate.get_map_width(); j++) {
-          if (jarakhindar > jarak_arah[i][j].first && kena_bomb[i][j] == 0) {
-              jarakhindar = jarak_arah[i][j].first;
-              tujuan.x = j;
-              tujuan.y = i;
-          }
+    Player* op = NULL;
+    for (Player player : players)
+        if (player.key != me->key) {
+            op = &player;
+            break;
         }
-      }
-      cout <<"Tujuan Menghindar : " <<tujuan.x << ',';
-      cout << tujuan.y << '\n';
-      cout <<"Arah Menghindar : " << jarak_arah[tujuan.y][tujuan.x].second << '\n';
-      gamestate.decide_move(jarak_arah[tujuan.y][tujuan.x].second);
-    //}
-  }else{
-    if (arah ==  GameState::GO_RIGHT && (gamestate[me->location.y][me->location.x+1].type & GameState::BRICK))
-        arah = GameState::PUT_BOMB;
-    else if (arah ==  GameState::GO_LEFT && (gamestate[me->location.y][me->location.x-1].type & GameState::BRICK))
-        arah = GameState::PUT_BOMB;
-    else if (arah ==  GameState::GO_DOWN && (gamestate[me->location.y+1][me->location.x].type & GameState::BRICK))
-        arah = GameState::PUT_BOMB;
-    else if (arah ==  GameState::GO_UP && (gamestate[me->location.y-1][me->location.x].type & GameState::BRICK))
-        arah = GameState::PUT_BOMB;
-    gamestate.decide_move(arah);
-  }
+
+    Location tujuan = op->location;
+    if(powerups.size() > 0){
+        int jarakpowerup = jarak_arah[powerups[0].location.y][powerups[0].location.x].first;
+        tujuan = powerups[0].location;
+        for (PowerUp powerup : powerups)
+            if(jarakpowerup > jarak_arah[powerup.location.y][powerup.location.x].first){
+                jarakpowerup = jarak_arah[powerup.location.y][powerup.location.x].first;
+                tujuan.x = powerup.location.x;
+                tujuan.y = powerup.location.y;
+            }
+    }
+
+    printf("Tujuan : (%d,%d)\n", tujuan.x, tujuan.y);
+
+    int arah = jarak_arah[tujuan.y][tujuan.x].second;
+
+    printf("Arah : %d\n", arah);
+
+    if (kena_bomb[me->location.y][me->location.x] > 0) {
+        if(jarak_arah[tujuan.y][tujuan.x].second != GameState::DO_NOTHING && !(gamestate[tujuan.y][tujuan.x].type & GameState::OCCUPIEABLE))
+            gamestate.decide_move(arah);
+        else {
+            int jarakhindar = 999;
+            for (int i = 1; i <= gamestate.get_map_height(); i++)
+                for (int j = 1; j <= gamestate.get_map_width(); j++)
+                    if (jarakhindar > jarak_arah[i][j].first && kena_bomb[i][j] == 0) {
+                        jarakhindar = jarak_arah[i][j].first;
+                        tujuan.x = j;
+                        tujuan.y = i;
+                    }
+            printf("Tujuan menghindar (%d,%d) -> %d\n", tujuan.x, tujuan.y, jarak_arah[tujuan.y][tujuan.x].second);
+            gamestate.decide_move(jarak_arah[tujuan.y][tujuan.x].second);
+        }
+    } else {
+        if (arah ==  GameState::GO_RIGHT && (gamestate[me->location.y][me->location.x+1].type & GameState::BRICK))
+            arah = GameState::PUT_BOMB;
+        else if (arah ==  GameState::GO_LEFT && (gamestate[me->location.y][me->location.x-1].type & GameState::BRICK))
+            arah = GameState::PUT_BOMB;
+        else if (arah ==  GameState::GO_DOWN && (gamestate[me->location.y+1][me->location.x].type & GameState::BRICK))
+            arah = GameState::PUT_BOMB;
+        else if (arah ==  GameState::GO_UP && (gamestate[me->location.y-1][me->location.x].type & GameState::BRICK))
+            arah = GameState::PUT_BOMB;
+        gamestate.decide_move(arah);
+    }
 
     return 0;
 }

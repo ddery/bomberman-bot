@@ -29,6 +29,10 @@ bool operator<(const Location& a, const Location& b) {
 	return a.x == b.x ? a.y < b.y : a.x < b.x;
 }
 
+bool operator==(const Location& a, const Location& b) {
+	return a.x == b.x && a.y == b.y;
+}
+
 void GameState::load_game_state(const char* file) {
   ifstream in(file);
   if (in.is_open()) {
