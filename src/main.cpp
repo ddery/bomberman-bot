@@ -71,6 +71,7 @@ int main(int argc, char** argv) {
     Player* me=gamestate.get_me();
     vector<Player> players = gamestate.get_player_vector();
     vector<PowerUp> powerups = gamestate.get_powerup_vector();
+    vector<Bomb> bombs = gamestate.get_bomb_vector();
 
 
     int ** batubata = generate_brick(gamestate);
@@ -122,6 +123,9 @@ int main(int argc, char** argv) {
         printf("Tujuan menghindar (%d,%d) -> %d\n", tujuan.x, tujuan.y, jarak_arah[tujuan.y][tujuan.x].second);
         gamestate.decide_move(jarak_arah[tujuan.y][tujuan.x].second);
     } else {
+        for (Bomb bomb : bombs)
+            if (bomb.owner->key == me->key)
+                arah = GameState::TRIGGER_BOMB;
 
         if (arah ==  GameState::GO_RIGHT && (gamestate[me->location.y][me->location.x+1].type & (GameState::BRICK | GameState::PLAYER)))
             arah = GameState::PUT_BOMB;

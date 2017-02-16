@@ -111,7 +111,7 @@ pair<int,int>** cari_jarak_arah(GameState& gamestate){
                     jarak[_y][_x].first = _jarak;
                     jarak[_y][_x].second = t.second == me->location ? _a : jarak[y][x].second;
                 }
-    			if((kena_bomb[_y][_x]-1 <= jarak[_y][_x].first) && kena_bomb[_y][_x] > 0)
+    			if((kena_bomb[_y][_x]-1 == jarak[_y][_x].first) && kena_bomb[_y][_x] > 0)
     				jarak[_y][_x].second = GameState::DO_NOTHING;
     			q.push(make_pair(-jarak[_y][_x].first,(Location) {_x,_y}));
     		}
