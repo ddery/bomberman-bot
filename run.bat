@@ -1,3 +1,3 @@
 @echo off
-mingw32-make run
+mingw32-make rusuh
 pause

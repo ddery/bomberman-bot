@@ -11,6 +11,9 @@ DEPS =  include/bomb.h \
 run: bin/bot.exe
 	gameengine/Bomberman.exe -b . 18plusplus --pretty
 
+rusuh: bin/bot.exe
+	gameengine/Bomberman.exe -b . 18plusplus . 18plusplus --pretty
+	
 bin/%.o: src/%.cpp $(DEPS)
 	g++ $(CFLAGS) -c -o $@ $<
 

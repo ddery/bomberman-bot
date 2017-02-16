@@ -111,7 +111,7 @@ pair<int,int>** cari_jarak_arah(GameState& gamestate){
                     jarak[_y][_x].first = _jarak;
                     jarak[_y][_x].second = t.second == me->location ? _a : jarak[y][x].second;
                 }
-    			if((kena_bomb[_y][_x]-1 == jarak[_y][_x].first) && kena_bomb[_y][_x] > 0)
+    			if((kena_bomb[_y][_x]-1 == jarak[_y][_x].first || kena_bomb[_y][_x] == jarak[_y][_x].first) && kena_bomb[_y][_x] > 0)
     				jarak[_y][_x].second = GameState::DO_NOTHING;
     			q.push(make_pair(-jarak[_y][_x].first,(Location) {_x,_y}));
     		}
@@ -164,6 +164,32 @@ int ** generate_brick(GameState& gamestate) {
                         break;
                     else
                         res[i][j-k]++;
+                }
+            }else if ((gamestate[i][j].type & GameState::PLAYER) && gamestate[i][j].player->key != me->key) {
+                res[i][j] += 10;
+                for(int k = 1; k <= me->bomb_radius; k++){
+                    if(gamestate[i+k][j].type & (GameState::BRICK | GameState::WALL))
+                        break;
+                    else
+                        res[i+k][j]+=10;
+                }
+                for(int k = 1; k <= me->bomb_radius; k++){
+                    if(gamestate[i-k][j].type & (GameState::BRICK | GameState::WALL))
+                        break;
+                    else
+                        res[i-k][j]+=10;
+                }
+                for(int k = 1; k <= me->bomb_radius; k++){
+                    if(gamestate[i][j+k].type & (GameState::BRICK | GameState::WALL))
+                        break;
+                    else
+                        res[i][j+k]+=10;
+                }
+                for(int k = 1; k <= me->bomb_radius; k++){
+                    if(gamestate[i][j-k].type & (GameState::BRICK | GameState::WALL))
+                        break;
+                    else
+                        res[i][j-k]+=10;
                 }
             }
         }

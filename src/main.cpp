@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     int ** batubata = generate_brick(gamestate);
     int** kena_bomb = generate_kena_bomb(gamestate);
 	  pair<int,int> **jarak_arah = cari_jarak_arah(gamestate);
-    debug_map(gamestate, batubata, jarak_arah);
+    debug_map(gamestate, kena_bomb, jarak_arah);
 
     for(int i = 1; i <= gamestate.get_map_height(); i++){
         for(int j = 1; j <= gamestate.get_map_width(); j++)
@@ -103,6 +103,24 @@ int main(int argc, char** argv) {
                 tujuan.x = powerup.location.x;
                 tujuan.y = powerup.location.y;
             }
+    }else{
+        double maximum = 0.0001;
+        for(int i = 1; i <= gamestate.get_map_height(); i++){
+            for(int j = 1; j <= gamestate.get_map_width(); j++){
+                /*if (jarak_arah[i][j].first == 0 && batubata[i][j] == 0 ){
+                  continue;
+                }
+                if (jarak_arah[i][j].first == 0) {
+                    maximum = 1000000000.00;
+                    tujuan.x = j;
+                    tujuan.y = i;
+                } else */if(maximum < (batubata[i][j]/(jarak_arah[i][j].first+1))){
+                    maximum = batubata[i][j]/(jarak_arah[i][j].first+1);
+                    tujuan.x = j;
+                    tujuan.y = i;
+                }
+            }
+        }
     }
 
     printf("Tujuan : (%d,%d)\n", tujuan.x, tujuan.y);
@@ -134,6 +152,8 @@ int main(int argc, char** argv) {
         else if (arah ==  GameState::GO_DOWN && (gamestate[me->location.y+1][me->location.x].type & (GameState::BRICK | GameState::PLAYER)))
             arah = GameState::PUT_BOMB;
         else if (arah ==  GameState::GO_UP && (gamestate[me->location.y-1][me->location.x].type & (GameState::BRICK | GameState::PLAYER)))
+            arah = GameState::PUT_BOMB;
+        else if (tujuan == me->location)
             arah = GameState::PUT_BOMB;
         gamestate.decide_move(arah);
     }
