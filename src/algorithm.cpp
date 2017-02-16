@@ -124,3 +124,49 @@ pair<int,int>** cari_jarak_arah(GameState& gamestate){
 
 	return jarak;
 }
+
+int ** generate_brick(GameState& gamestate) {
+    int width = gamestate.get_map_width();
+    int height = gamestate.get_map_height();
+
+    int **res = new int*[height + 1];
+    for (int i = 1; i <= height; i++) {
+        res[i] = new int[width+1];
+        for (int j = 1; j <= width; j++)
+            res[i][j] = 0;
+    }
+
+    Player * me = gamestate.get_me();
+
+    for (int i = 1; i <= height; i++) {
+        for (int j = 1; j <= width; j++) {
+            if(gamestate[i][j].type & GameState::BRICK){
+                for(int k = 1; k <= me->bomb_radius; k++){
+                    if(gamestate[i+k][j].type & (GameState::BRICK | GameState::WALL))
+                        break;
+                    else
+                        res[i+k][j]++;
+                }
+                for(int k = 1; k <= me->bomb_radius; k++){
+                    if(gamestate[i-k][j].type & (GameState::BRICK | GameState::WALL))
+                        break;
+                    else
+                        res[i-k][j]++;
+                }
+                for(int k = 1; k <= me->bomb_radius; k++){
+                    if(gamestate[i][j+k].type & (GameState::BRICK | GameState::WALL))
+                        break;
+                    else
+                        res[i][j+k]++;
+                }
+                for(int k = 1; k <= me->bomb_radius; k++){
+                    if(gamestate[i][j-k].type & (GameState::BRICK | GameState::WALL))
+                        break;
+                    else
+                        res[i][j-k]++;
+                }
+            }
+        }
+    }
+    return res;
+}

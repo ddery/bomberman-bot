@@ -63,6 +63,8 @@ int** generate_kena_bomb(GameState& gamestate);
  */
 pair<int,int>** cari_jarak_arah(GameState& gamestate);
 
+int ** generate_brick(GameState& gamestate);
+
 int main(int argc, char** argv) {
     GameState gamestate(argc,argv);
 
@@ -70,9 +72,18 @@ int main(int argc, char** argv) {
     vector<Player> players = gamestate.get_player_vector();
     vector<PowerUp> powerups = gamestate.get_powerup_vector();
 
+
+    int ** batubata = generate_brick(gamestate);
     int** kena_bomb = generate_kena_bomb(gamestate);
-	pair<int,int> **jarak_arah = cari_jarak_arah(gamestate);
-    debug_map(gamestate, kena_bomb, jarak_arah);
+	  pair<int,int> **jarak_arah = cari_jarak_arah(gamestate);
+    debug_map(gamestate, batubata, jarak_arah);
+
+    for(int i = 1; i <= gamestate.get_map_height(); i++){
+        for(int j = 1; j <= gamestate.get_map_width(); j++)
+            cout << batubata[i][j] << " ";
+        cout<<"\n";
+    }
+
 
     Player* op = NULL;
     for (Player player : players)
@@ -111,6 +122,7 @@ int main(int argc, char** argv) {
         printf("Tujuan menghindar (%d,%d) -> %d\n", tujuan.x, tujuan.y, jarak_arah[tujuan.y][tujuan.x].second);
         gamestate.decide_move(jarak_arah[tujuan.y][tujuan.x].second);
     } else {
+
         if (arah ==  GameState::GO_RIGHT && (gamestate[me->location.y][me->location.x+1].type & (GameState::BRICK | GameState::PLAYER)))
             arah = GameState::PUT_BOMB;
         else if (arah ==  GameState::GO_LEFT && (gamestate[me->location.y][me->location.x-1].type & (GameState::BRICK | GameState::PLAYER)))
