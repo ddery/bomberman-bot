@@ -105,22 +105,13 @@ int main(int argc, char** argv) {
             }
     }else{
         double maximum = 0.0001;
-        for(int i = 1; i <= gamestate.get_map_height(); i++){
-            for(int j = 1; j <= gamestate.get_map_width(); j++){
-                /*if (jarak_arah[i][j].first == 0 && batubata[i][j] == 0 ){
-                  continue;
-                }
-                if (jarak_arah[i][j].first == 0) {
-                    maximum = 1000000000.00;
-                    tujuan.x = j;
-                    tujuan.y = i;
-                } else */if(maximum < (batubata[i][j]/(jarak_arah[i][j].first+1))){
+        for(int i = 1; i <= gamestate.get_map_height(); i++)
+            for(int j = 1; j <= gamestate.get_map_width(); j++)
+                if(maximum < (batubata[i][j]/(jarak_arah[i][j].first+1))){
                     maximum = batubata[i][j]/(jarak_arah[i][j].first+1);
                     tujuan.x = j;
                     tujuan.y = i;
                 }
-            }
-        }
     }
 
     printf("Tujuan : (%d,%d)\n", tujuan.x, tujuan.y);

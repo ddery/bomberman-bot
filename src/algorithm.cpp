@@ -140,57 +140,23 @@ int ** generate_brick(GameState& gamestate) {
 
     for (int i = 1; i <= height; i++) {
         for (int j = 1; j <= width; j++) {
-            if(gamestate[i][j].type & GameState::BRICK){
-                for(int k = 1; k <= me->bomb_radius; k++){
-                    if(gamestate[i+k][j].type & (GameState::BRICK | GameState::WALL))
-                        break;
-                    else
-                        res[i+k][j]++;
-                }
-                for(int k = 1; k <= me->bomb_radius; k++){
-                    if(gamestate[i-k][j].type & (GameState::BRICK | GameState::WALL))
-                        break;
-                    else
-                        res[i-k][j]++;
-                }
-                for(int k = 1; k <= me->bomb_radius; k++){
-                    if(gamestate[i][j+k].type & (GameState::BRICK | GameState::WALL))
-                        break;
-                    else
-                        res[i][j+k]++;
-                }
-                for(int k = 1; k <= me->bomb_radius; k++){
-                    if(gamestate[i][j-k].type & (GameState::BRICK | GameState::WALL))
-                        break;
-                    else
-                        res[i][j-k]++;
-                }
-            }else if ((gamestate[i][j].type & GameState::PLAYER) && gamestate[i][j].player->key != me->key) {
+            int move_x[4] = {-1,1,0,0};
+            int move_y[4] = {0,0,-1,1};
+            if (gamestate[i][j].type & GameState::BRICK) {
+                for (int m = 0; m < 4; m++)
+                    for (int k = 1; k <= me->bomb_radius; k++)
+                        if (gamestate[i+k*move_y[m]][j+k*move_x[m]].type & (GameState::BRICK | GameState::WALL))
+                            break;
+                        else
+                            res[i+k*move_y[m]][j+k*move_x[m]]++;
+            } else if ((gamestate[i][j].type & GameState::PLAYER) && gamestate[i][j].player->key != me->key) {
                 res[i][j] += 10;
-                for(int k = 1; k <= me->bomb_radius; k++){
-                    if(gamestate[i+k][j].type & (GameState::BRICK | GameState::WALL))
-                        break;
-                    else
-                        res[i+k][j]+=10;
-                }
-                for(int k = 1; k <= me->bomb_radius; k++){
-                    if(gamestate[i-k][j].type & (GameState::BRICK | GameState::WALL))
-                        break;
-                    else
-                        res[i-k][j]+=10;
-                }
-                for(int k = 1; k <= me->bomb_radius; k++){
-                    if(gamestate[i][j+k].type & (GameState::BRICK | GameState::WALL))
-                        break;
-                    else
-                        res[i][j+k]+=10;
-                }
-                for(int k = 1; k <= me->bomb_radius; k++){
-                    if(gamestate[i][j-k].type & (GameState::BRICK | GameState::WALL))
-                        break;
-                    else
-                        res[i][j-k]+=10;
-                }
+                for (int m = 0; m < 4; m++)
+                    for (int k = 1; k <= me->bomb_radius; k++)
+                        if(gamestate[i+k*move_y[m]][j+k*move_x[m]].type & (GameState::BRICK | GameState::WALL))
+                            break;
+                        else
+                            res[i+k*move_y[m]][j+k*move_x[m]]+=10;
             }
         }
     }
