@@ -162,3 +162,47 @@ int ** generate_brick(GameState& gamestate) {
     }
     return res;
 }
+
+int** generate_luas(GameState& gamestate) {
+    int** result = new int*[gamestate.get_map_height()+1];
+    for (int i = 1; i <= gamestate.get_map_height(); i++)
+        result[i] = new int[gamestate.get_map_width()+1]();
+    int** kena_bomb = generate_kena_bomb(gamestate);
+
+    int c = 1;
+    for (int i = 1; i <= gamestate.get_map_height(); i++)
+        for (int j = 1; j <= gamestate.get_map_width(); j++)
+            if (result[i][j] == 0 && (gamestate[i][j].type & GameState::OCCUPIEABLE)) {
+                stack<pair<int,int> > st;
+                st.push(make_pair(i,j));
+                while (!st.empty()) {
+                    pair<int,int> t = st.top(); st.pop();
+                    int y = t.first;
+                    int x = t.second;
+                    if (result[y][x] == 0) {
+                        result[y][x] = c;
+                        if ((gamestate[y][x+1].type & GameState::OCCUPIEABLE) && kena_bomb[y][x+1] == 0 && result[y][x+1] == 0)
+                            st.push(make_pair(y,x+1));
+                        if ((gamestate[y][x-1].type & GameState::OCCUPIEABLE) && kena_bomb[y][x-1] == 0 && result[y][x-1] == 0)
+                            st.push(make_pair(y,x-1));
+                        if ((gamestate[y+1][x].type & GameState::OCCUPIEABLE) && kena_bomb[y+1][x] == 0 && result[y+1][x] == 0)
+                            st.push(make_pair(y+1,x));
+                        if ((gamestate[y-1][x].type & GameState::OCCUPIEABLE) && kena_bomb[y-1][x] == 0 && result[y-1][x] == 0)
+                            st.push(make_pair(y-1,x));
+                    }
+                }
+                c++;
+            }
+
+    map<int,int> mp;
+    for (int i = 1; i <= gamestate.get_map_height(); i++)
+        for (int j = 1; j <= gamestate.get_map_width(); j++)
+            if (result[i][j] > 0)
+                mp[result[i][j]]++;
+    for (int i = 1; i <= gamestate.get_map_height(); i++)
+        for (int j = 1; j <= gamestate.get_map_width(); j++)
+            if (result[i][j] > 0)
+                result[i][j] = mp[result[i][j]];
+
+    return result;
+}

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void debug_map(GameState& gamestate, int** kena_bomb, pair<int,int>** jarak_arah) {
+void debug_map(GameState& gamestate, int** kena_bomb, pair<int,int>** jarak_arah, int** luas) {
     int width = gamestate.get_map_width();
     int height = gamestate.get_map_height();
 
@@ -35,6 +35,16 @@ void debug_map(GameState& gamestate, int** kena_bomb, pair<int,int>** jarak_arah
         }
         cout<<endl;
     }
+
+    printf("Luas :\n  ");
+    for (int i = 1; i <= width; i++)
+        printf("%4d", i); printf("\n");
+    for (int i = 1; i <= height; i++) {
+        printf("%2d ", i);
+        for (int j = 1; j <= width; j++)
+            printf("%3d ", luas[i][j]);
+        printf("\n");
+    }
 }
 
 /*
@@ -63,7 +73,9 @@ int** generate_kena_bomb(GameState& gamestate);
  */
 pair<int,int>** cari_jarak_arah(GameState& gamestate);
 
-int ** generate_brick(GameState& gamestate);
+int** generate_luas(GameState& gamestate);
+
+int** generate_brick(GameState& gamestate);
 
 int main(int argc, char** argv) {
     GameState gamestate(argc,argv);
@@ -74,10 +86,11 @@ int main(int argc, char** argv) {
     vector<Bomb> bombs = gamestate.get_bomb_vector();
 
 
-    int ** batubata = generate_brick(gamestate);
+    int** batubata = generate_brick(gamestate);
     int** kena_bomb = generate_kena_bomb(gamestate);
-	  pair<int,int> **jarak_arah = cari_jarak_arah(gamestate);
-    debug_map(gamestate, kena_bomb, jarak_arah);
+    int** luas = generate_luas(gamestate);
+	pair<int,int> **jarak_arah = cari_jarak_arah(gamestate);
+    debug_map(gamestate, kena_bomb, jarak_arah, luas);
 
     for(int i = 1; i <= gamestate.get_map_height(); i++){
         for(int j = 1; j <= gamestate.get_map_width(); j++)
@@ -122,10 +135,12 @@ int main(int argc, char** argv) {
 
     if (kena_bomb[me->location.y][me->location.x] > 0) {
         int jarakhindar = 999;
+        int luashindar = -999;
         for (int i = 1; i <= gamestate.get_map_height(); i++)
             for (int j = 1; j <= gamestate.get_map_width(); j++)
-                if (jarakhindar > jarak_arah[i][j].first && kena_bomb[i][j] == 0) {
+                if ((jarakhindar > jarak_arah[i][j].first || (jarakhindar == jarak_arah[i][j].first && luashindar < luas[i][j])) && kena_bomb[i][j] == 0) {
                     jarakhindar = jarak_arah[i][j].first;
+                    luashindar = luas[i][j];
                     tujuan.x = j;
                     tujuan.y = i;
                 }
