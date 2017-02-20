@@ -1,3 +1,3 @@
 @echo off
-mingw32-make duel
+mingw32-make demo
 pause
