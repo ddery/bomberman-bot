@@ -1,3 +1,3 @@
 @echo off
-mingw32-make rusuh
+mingw32-make duel
 pause

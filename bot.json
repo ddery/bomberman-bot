@@ -1,7 +1,7 @@
 {
-	"Author":"Jauhar Arifin",
+	"Author":"Wumbo Star",
     "Email":"jauhararifin@gmail.com",
-    "NickName" :"Jauhar",
+    "NickName" :"Wumbo",
     "BotType": "CPlusPlus",
     "ProjectLocation" : ".",
     "RunFile" : "bin\\bot.exe"

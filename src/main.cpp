@@ -50,7 +50,7 @@ void debug_map(GameState& gamestate, int** kena_bomb, pair<int,int>** jarak_arah
 /*
  * generate_kena_bomb
  * author : Dery Rahman
- * tanggal : 13 Februari 2016
+ * tanggal : 13 Februari 2017
  * digunakan untuk menciptakan matriks berukuran sama seperti map yang berisi
  * integer. Integer tersebut menyatakan banyaknya detik yang tersisa sehingga
  * petak yang bersangkutan akan meledak. matriks[y][x] menyatakan detik yang
@@ -63,7 +63,7 @@ int** generate_kena_bomb(GameState& gamestate);
 /*
  * cari_jarak_arah
  * author : Dery Rahman
- * tanggal : 14 Februari 2016
+ * tanggal : 14 Februari 2017
  * digunakan untuk mendapatkan jarak dari player "me" ke semua petak di peta
  * dalam representasi matriks berukuran seperti peta yang bertipe pair<int,int>.
  * nilai first menunjukkan jarak dari posisi player sekarang, second menunjukkan
@@ -73,20 +73,45 @@ int** generate_kena_bomb(GameState& gamestate);
  */
 pair<int,int>** cari_jarak_arah(GameState& gamestate);
 
+/*
+ * generate_luas
+ * author : Jauhar Arifin
+ * tanggal : 17 Februari 2017
+ * digunakan untuk menentukan luas petak. Luas petak didefinisikan sebagai
+ * banyaknya petak kosong yang dapat ditempati oleh player tanpa melalui brick,
+ * wall, atau petak-petak yang akan terkena bomb. Proses ini menggunakan
+ * pendekatan DFS dengan algoritma floodfill.
+ * gamestate : berisi game state
+ * return : int** yang menyatakan matriks berisi luas petak. matriks[i][j] me-
+ * nandakan luas petak pada posisi (j,i).
+ */
 int** generate_luas(GameState& gamestate);
 
-int** generate_brick(GameState& gamestate);
+/*
+ * generate_point
+ * author : Irfan Ariq
+ * tanggal : 16 Feruari 2017
+ * digunakan untuk menilai point setiap petak, setiap petak memiliki point yang
+ * ditentukan dari banyaknya brick di sekitarnya dan keberadaan musuh di seki-
+ * tarnya. Petak yang memiliki nilai tinggi dan jarak tempuh yang pendek akan
+ * menjadi prioritas untuk dikunjungi.
+ * gamestate : berisi game state
+ * return : int** yang menyatakan matriks berisi point setiap petak.
+ */
+int** generate_point(GameState& gamestate);
 
 int main(int argc, char** argv) {
+    // Menciptakan gamestate dari input
     GameState gamestate(argc,argv);
 
+    // Insialisasi varibel yang sering digunakan
     Player* me=gamestate.get_me();
     vector<Player> players = gamestate.get_player_vector();
     vector<PowerUp> powerups = gamestate.get_powerup_vector();
     vector<Bomb> bombs = gamestate.get_bomb_vector();
 
-
-    int** batubata = generate_brick(gamestate);
+    // Menghitung matriks yang akan digunakan dalam greedy
+    int** batubata = generate_point(gamestate);
     int** kena_bomb = generate_kena_bomb(gamestate);
     int** luas = generate_luas(gamestate);
 	pair<int,int> **jarak_arah = cari_jarak_arah(gamestate);
@@ -98,7 +123,7 @@ int main(int argc, char** argv) {
         cout<<"\n";
     }
 
-
+    // memilih satu lawan yang akan ditinjau
     Player* op = NULL;
     for (Player player : players)
         if (player.key != me->key) {
@@ -106,6 +131,7 @@ int main(int argc, char** argv) {
             break;
         }
 
+    // menentukan tujuan player saat ini
     Location tujuan = op->location;
     if(powerups.size() > 0){
         int jarakpowerup = jarak_arah[powerups[0].location.y][powerups[0].location.x].first;
@@ -133,6 +159,8 @@ int main(int argc, char** argv) {
 
     printf("Arah : %d\n", arah);
 
+    // menentukan langkah yang akan diambil oleh player berdasarkan tujuan dan
+    // keadaan saat ini.
     if (kena_bomb[me->location.y][me->location.x] > 0) {
         int jarakhindar = 999;
         int luashindar = -999;

@@ -1,40 +1,58 @@
-Map Width: 21, Map Height: 21, Current Round: 375, Seed: 58868438, PlayerBounty: 470
+Map Width: 21, Map Height: 21, Current Round: 1, Seed: 1071393888, PlayerBounty: 395
 #####################
-#   A               #
-# # # # # # # # # # #
-#                   #
-# # # # # # # # # # #
-#                   #
-# # # # # # # # # # #
-#                   #
-# # # # # # # # # # #
-#                   #
-# # # # #   # # # # #
-#                   #
-# # # # # # # # # # #
-#          B        #
-# # # # # # # # # # #
-#                   #
-# # # # # # # # # # #
-#                   #
-# # # # # # # # # # #
-#                   #
+# A + ++++ ++++ + D #
+# # # # #+#+# # # # #
+#  +  ++ +++ ++  +  #
+#+#+# #+#+#+#+# #+#+#
+#+ + ++   +   ++ + +#
+#+# #+# # # # #+# #+#
+# +++ +++ + +++ +++ #
+#+# # #+#+#+#+# # #+#
+#+ + +  +++++  + + +#
+# # #+# #+$+# #+# # #
+#+ + +  +++++  + + +#
+#+# # #+#+#+#+# # #+#
+# +++ +++ + +++ +++ #
+#+# #+# # # # #+# #+#
+#+ + ++   +   ++ + +#
+#+#+# #+#+#+#+# #+#+#
+#  +  ++ +++ ++  +  #
+# # # # #+#+# # # # #
+# C + ++++ ++++ + B #
 #####################
 ---------------------------
-Player Name: Jauhar
+Player Name: Wumbo
 Key: A
-Points: 642
+Points: 0
 Status: Alive
 Bombs: 
-BombBag: 5
-BlastRadius: 64
+BombBag: 1
+BlastRadius: 1
 ---------------------------
 ---------------------------
 Player Name: Jehian Ganteng
 Key: B
-Points: 368
+Points: 0
 Status: Alive
 Bombs: 
-BombBag: 2
-BlastRadius: 8
+BombBag: 1
+BlastRadius: 1
+---------------------------
+---------------------------
+Player Name: Wumbo
+Key: C
+Points: 0
+Status: Alive
+Bombs: 
+BombBag: 1
+BlastRadius: 1
+---------------------------
+---------------------------
+Player Name: Jehian Ganteng
+Key: D
+Points: 0
+Status: Alive
+Bombs: 
+BombBag: 1
+BlastRadius: 1
 ---------------------------

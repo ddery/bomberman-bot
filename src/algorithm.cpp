@@ -125,7 +125,7 @@ pair<int,int>** cari_jarak_arah(GameState& gamestate){
 	return jarak;
 }
 
-int ** generate_brick(GameState& gamestate) {
+int ** generate_point(GameState& gamestate) {
     int width = gamestate.get_map_width();
     int height = gamestate.get_map_height();
 
@@ -150,13 +150,13 @@ int ** generate_brick(GameState& gamestate) {
                         else
                             res[i+k*move_y[m]][j+k*move_x[m]]++;
             } else if ((gamestate[i][j].type & GameState::PLAYER) && gamestate[i][j].player->key != me->key) {
-                res[i][j] += 10;
+                res[i][j] += 4;
                 for (int m = 0; m < 4; m++)
                     for (int k = 1; k <= me->bomb_radius; k++)
                         if(gamestate[i+k*move_y[m]][j+k*move_x[m]].type & (GameState::BRICK | GameState::WALL))
                             break;
                         else
-                            res[i+k*move_y[m]][j+k*move_x[m]]+=10;
+                            res[i+k*move_y[m]][j+k*move_x[m]]+=4;
             }
         }
     }

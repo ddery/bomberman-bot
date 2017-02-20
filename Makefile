@@ -14,6 +14,12 @@ run: bin/bot.exe
 rusuh: bin/bot.exe
 	gameengine/Bomberman.exe -b . 18plusplus . 18plusplus --pretty
 	
+demo: bin/bot.exe
+	gameengine/Bomberman.exe -b . coba 18plusplus bot-reference --pretty
+
+duel: bin/bot.exe
+	gameengine/Bomberman.exe -b . coba --pretty
+	
 bin/%.o: src/%.cpp $(DEPS)
 	g++ $(CFLAGS) -c -o $@ $<
 
